@@ -4,41 +4,6 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-def eliminate_negatives(data: pd.DataFrame):
-    data=data.drop('ehail_fee', axis=1)
-    numeric_cols = data.select_dtypes(include=[np.number]).columns
-
-    data = data[(data[numeric_cols] >= 0).all(axis=1)]
-    print(data.head())
-    return data
-
-def fix_types(data: pd.DataFrame):
-    data["lpep_pickup_datetime"] = pd.to_datetime(
-        data["lpep_pickup_datetime"],
-        errors="coerce"
-    )
-
-    data["lpep_dropoff_datetime"] = pd.to_datetime(
-        data["lpep_dropoff_datetime"],
-        errors="coerce"
-    )
-    return data
-
-def filter_business_rules(data):
-    data = data[
-        (data["trip_distance"] > 0) & 
-        (data["total_amount"] > 5) &
-        (data["passenger_count"] > 0) &
-        ~data["RatecodeID"].isin([3, 4]) &
-        ~data["payment_type"].isin([4, 5])
-    ]
-    
-    mask = (
-        ((data["lpep_pickup_datetime"].dt.year >= 2015) & (data["improvement_surcharge"] == 0.3)) |
-        ((data["lpep_pickup_datetime"].dt.year < 2015) & (data["improvement_surcharge"] == 0.0))
-    )
-    data = data[mask]
-    return data
 
 def calc_trip_time(pickup: np.array, dropoff: np.array) -> np.array:
     trip_duration = (dropoff - pickup).dt.total_seconds() / 60
@@ -49,13 +14,6 @@ def avg_speed(distance, duration):
     avg_speed = distance / duration
     return avg_speed
 
-def clip_outliers(df, col, upper_q=0.95):
-    lower = df[col].quantile(1-upper_q)
-    upper = df[col].quantile(upper_q)
-    df[col] = df[col].clip(upper=upper, lower=lower)
-    return df
-
-
 def process_silver():
     input_path = "data/bronze/taxi_raw.parquet"
     if not os.path.exists(input_path):
@@ -64,25 +22,17 @@ def process_silver():
     df = pd.read_parquet(input_path)
     logging.info(f"Bronze veri okundu: {len(df)} satır.")
 
-    # Kritik: ehail_fee drop ve negatif temizliği
-    df = eliminate_negatives(df)
-    
-    # Tarih formatı ve Outlier temizliği
-    df = fix_types(df)
-    df = filter_business_rules(df)
 
     df['trip_duration_min'] = calc_trip_time(df['lpep_pickup_datetime'], df['lpep_dropoff_datetime'])
 
     df['avg_speed_kmh'] = np.where(df['trip_duration_min'] > 0, 
                                    df['trip_distance'] / (df['trip_duration_min'] / 60), 0)
-
-
+    
     assert (df['fare_amount'] >= 0).all(), "HATA: Silver veride hala negatif ücret var!"
     assert (df['trip_distance'] > 0).all(), "HATA: Mesafe 0 veya negatif olamaz!"
     assert not df['lpep_pickup_datetime'].isna().any(), "HATA: Tarih sütununda boş değerler var!"
     
     logging.info(f"Silver temizliği tamamlandı: {len(df)} satır kaldı.")
-
 
     output_path = "data/silver/"
     if not os.path.exists(output_path):

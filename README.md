@@ -30,7 +30,7 @@ Veri seti RAM’e tamamen alınmadan DuckDB ile incelenmiştir.
 
 ### Temel bilgiler:
 
-* Toplam satır sayısı: **83,691** *(%1 sample üzerinden analiz yapılmıştır)*
+* Toplam satır sayısı: **83,691** *(%5 sample üzerinden analiz yapılmıştır)*
 * Toplam sütun sayısı: **20**
 
 ### Sütunlar:
@@ -93,11 +93,19 @@ Eksik veri oranları incelenmiştir.
 Veri setinde aşağıdaki anomali durumları tespit edilmiştir:
 
 * Negatif değerler (özellikle ücret ve mesafe alanlarında)
-* `trip_distance = 0` olan kayıtlar
+* `trip_distance <= 0` olan kayıtlar
+* `total_amount <= 5` olan kayıtlar
 * Olağan dışı yüksek mesafe değerleri
 * Negatif veya hatalı süre hesapları
 
 👉 Bu değerler veri kalitesini bozabilecek açık aykırılıklar olarak değerlendirilmiştir.
+
+2015 yılından sonra başlayan 0.3 değerindeki 'improvement_surcharge' için yıl ödeme filtresi yapıldı
+
+- Yolculuk süresi,
+- Ortalama hız;
+Değerleri hesaplanıp yeni feature olarak eklendi.
+
 
 ---
 
@@ -130,27 +138,8 @@ Ana senaryo olarak **Order Count** seçilmiştir çünkü operasyonel planlama a
 
 Alternatif olarak **Average Fare** senaryosu değerlendirilmiştir. Bu senaryo fiyat trendlerini anlamak ve stratejik karar destek sağlamak için uygundur.
 
----
-
-## 📦 Çıktılar
-
-* `notebooks/01_eda.ipynb` → Veri keşfi ve analiz adımları
-* `README.md` → EDA bulguları ve senaryo seçimi
-* `drawio` → Veri akış diyagramı
-
----
-
-## ⏱️ Süre
-
-Toplam süre: **4 saat**
-
-* DuckDB ile veri keşfi: 1 saat
-* Örneklem üzerinde analiz: 0.5 saat
-* Eksik veri ve aykırılık analizi: 1 saat
-* Senaryo seçimi: 0.5 saat
-* Dokümantasyon: 1 saat
-
--------------------------------------
+Karbon emilimi ile ilgili bir analiz de eklenecektir.
+*km ~= 181 gram karbondioksit*
 
 ## Medallion mimarisi üzerine
 Bu mimaride ETL süreçleri dikkate alınmıştır.
@@ -164,27 +153,10 @@ Ham verinin yüklenmesi ve kaydedilme sürecini fonksiyonel olarak tutar
 Ham verinin orijinal halini bozmadan okur temizler ve özellik mühendisliği ile yeni featurelar oluşturup ayrı bir parquet dosyasında kaydeder.
 
 ### Gold
-Aldığı silver veriyi kullanıcı için anlamlı istatistiksel bilgi ve grafiklere dönüştürür. (BURAYA BİR DASHBOARD EKLEYEBİLİRİM MAYBE)
+Aldığı silver veriyi kullanıcı için anlamlı istatistiksel bilgi ve grafiklere dönüştürür.
 
 ## Load süreci
 Postgresql kullanılmış olup süreçlerde oluşturulan bilgiler table olarak kayddilmiştir. buradaki amaç bir süreçte sorun çıktığında baştan başlamamayı sağlamaktır.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
