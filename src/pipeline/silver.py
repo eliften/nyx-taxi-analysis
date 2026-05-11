@@ -14,6 +14,29 @@ def avg_speed(distance, duration):
     avg_speed = distance / duration
     return avg_speed
 
+def clip_outliers(df, col, upper_q=0.95):
+    lower = df[col].quantile(1-upper_q)
+    upper = df[col].quantile(upper_q)
+    df[col] = df[col].clip(upper=upper, lower=lower)
+    return df
+
+def filter_business_rules(data):
+    data = data[
+        (data["trip_distance"] > 0) & 
+        (data["total_amount"] > 5) &
+        (data["passenger_count"] > 0) &
+        ~data["RatecodeID"].isin([3, 4]) &
+        ~data["payment_type"].isin([4, 5])
+    ]
+    
+    mask = (
+        ((data["lpep_pickup_datetime"].dt.year >= 2015) & (data["improvement_surcharge"] == 0.3)) |
+        ((data["lpep_pickup_datetime"].dt.year < 2015) & (data["improvement_surcharge"] == 0.0))
+    )
+    data = data[mask]
+    return data
+
+
 def process_silver():
     input_path = "data/bronze/taxi_raw.parquet"
     if not os.path.exists(input_path):
@@ -28,6 +51,10 @@ def process_silver():
     df['avg_speed_kmh'] = np.where(df['trip_duration_min'] > 0, 
                                    df['trip_distance'] / (df['trip_duration_min'] / 60), 0)
     
+    df = clip_outliers(df, 'fare_amount')
+    df = clip_outliers(df, 'trip_duration_min')
+
+    df = filter_business_rules(df)
     assert (df['fare_amount'] >= 0).all(), "HATA: Silver veride hala negatif ücret var!"
     assert (df['trip_distance'] > 0).all(), "HATA: Mesafe 0 veya negatif olamaz!"
     assert not df['lpep_pickup_datetime'].isna().any(), "HATA: Tarih sütununda boş değerler var!"

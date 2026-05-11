@@ -13,24 +13,27 @@ def create_gold_daily_trips():
     df = pd.read_parquet(input_path)
     logging.info(f"Silver veri okundu. Satır sayısı: {len(df)}")
 
-    df['pickup_date'] = df['lpep_pickup_datetime'].dt.date
+'''    df['pickup_date'] = df['lpep_pickup_datetime'].dt.date
 
     gold_df = df.groupby('pickup_date').agg(
         total_trips=('VendorID', 'count'),
         avg_fare=('fare_amount', 'mean'),
         total_distance=('trip_distance', 'sum')
-    ).reset_index()
+    ).reset_index()'''
 
-    assert not gold_df.empty, "HATA: Gold tablosu boş oluştu!"
-    assert (gold_df['avg_fare'] > 0).all(), "HATA: Ortalama ücretlerde tutarsızlık var!"
+    # assert not gold_df.empty, "HATA: Gold tablosu boş oluştu!"
+    # assert (gold_df['avg_fare'] > 0).all(), "HATA: Ortalama ücretlerde tutarsızlık var!"
     
-    logging.info(f"Gold özeti oluşturuldu. Gün sayısı: {len(gold_df)}")
+    # logging.info(f"Gold özeti oluşturuldu. Gün sayısı: {len(gold_df)}")
 
-    output_path = "data/gold/"
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-    file_full_path = os.path.join(output_path, "daily_trips.parquet")
-    gold_df.to_parquet(file_full_path, index=False)
+    # output_path = "data/gold/"
+    # if not os.path.exists(output_path):
+    #     os.makedirs(output_path)
+    # file_full_path = os.path.join(output_path, "daily_trips.parquet")
+    # gold_df.to_parquet(file_full_path, index=False)
     
-    logging.info(f"Gold veri başarıyla kaydedildi: {file_full_path}")
-    return gold_df
+    # logging.info(f"Gold veri başarıyla kaydedildi: {file_full_path}")
+    # return gold_df
+
+
+create_gold_daily_trips()
