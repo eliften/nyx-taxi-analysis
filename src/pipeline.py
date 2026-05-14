@@ -1,8 +1,9 @@
 import logging
 import pandas as pd
-from pipeline import bronze, silver, gold
-from pipeline import silver
-from pipeline.gold import create_gold_daily_trips  # Gold modülünü eklediğini varsayıyoruz
+from src.pipeline import silver
+from src.pipeline import silver
+from src.pipeline import gold
+from src.pipeline import bronze, gold
 from utils.load import DatabaseLoader
 
 # Loglama ayarı
@@ -18,8 +19,8 @@ class TaxiETL:
         logging.info(f"--- Medallion Pipeline Başladı: {self.project_id} ---")
 
         self.df_bronze = bronze.pipe(self.project_id)
-        self.df_silver = silver.pi
-        self.df_gold = create_gold_daily_trips()
+        self.df_silver = silver.pipe()
+        self.df_gold = gold.pipe()
 
         db_loader = DatabaseLoader()
         db_loader.load_to_sql(self.df_silver, "silver_taxi_trips", if_exists="replace")

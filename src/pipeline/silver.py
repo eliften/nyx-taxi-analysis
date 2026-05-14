@@ -37,7 +37,7 @@ def filter_business_rules(data):
     return data
 
 
-def process_silver():
+def pipe():
     input_path = "data/bronze/taxi_raw.parquet"
     if not os.path.exists(input_path):
         raise FileNotFoundError("Bronze veri bulunamadı! Önce bronze.py çalıştırılmalı.")

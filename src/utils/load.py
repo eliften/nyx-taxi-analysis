@@ -1,9 +1,8 @@
 from sqlalchemy import create_engine
-import pandas as pd
 import os
 import dotenv
 
-dotenv.load_dotenv()  # .env dosyasını yükle
+dotenv.load_dotenv() 
 
 class DatabaseLoader:
     def __init__(self):
@@ -22,7 +21,6 @@ class DatabaseLoader:
         return create_engine(url)
 
     def load_to_sql(self, df, table_name, if_exists="append"):
-        """Veriyi veritabanına yükler."""
         try:
             df.to_sql(
                 table_name,
