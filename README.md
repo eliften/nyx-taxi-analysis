@@ -85,7 +85,6 @@ Eksik veri oranları incelendi.
 
  Bu durumun veri üretim sürecinden kaynaklanan yapısal bir eksiklik olduğu düşünüldü.
 
-
 ![Missing Data](missingratio.png)
 
 ---
